@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 def Titanic_data_cleaner(data):
 #Preparing data for use
-    data.drop(['Cabin'], axis=1)
     data.Embarked.fillna(method = 'backfill')
     data.Fare.dropna()
 
@@ -26,9 +26,21 @@ def Titanic_data_cleaner(data):
     del data['age_med']
     
 #encoding coulumns
-    
+
+# Apply label encoder to each column with categorical data    
     label_encoder = LabelEncoder()
     data.Sex = label_encoder.fit_transform(data.Sex)
+
+# Apply one-hot encoder to each column with categorical data
+    categorical = ['Embarked', 'Title']
     
+    for cat in categorical:
+        data = pd.concat([data, pd.get_dummies(data[cat], prefix=cat)], axis=1)
+        
+        del data[cat]
+
+
+#Drop unused data
+    data.drop(['Cabin', 'Ticket', 'Name', 'PassengerId'], axis=1, inplace=True)
     
     return data

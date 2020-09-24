@@ -22,3 +22,12 @@ data = Titanic_data_cleaner(data)
 
 ax = sns.countplot(x="Pclass", hue="Sex", data=data)
 ax.figure.savefig("output.pdf")
+
+
+
+s = (data.dtypes == 'object')
+object_cols = list(s[s].index)
+
+print("Categorical variables:")
+print(object_cols)
+print(data)
