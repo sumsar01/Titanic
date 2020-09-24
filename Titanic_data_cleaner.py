@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 def Titanic_data_cleaner(data):
 #Preparing data for use
@@ -23,5 +24,11 @@ def Titanic_data_cleaner(data):
 #replacing missing ages
     data['Age'].fillna(data['age_med'], inplace=True)
     del data['age_med']
+    
+#encoding coulumns
+    
+    label_encoder = LabelEncoder()
+    data.Sex = label_encoder.fit_transform(data.Sex)
+    
     
     return data

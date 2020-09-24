@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import rcParams
 from  Titanic_data_cleaner import Titanic_data_cleaner
 
+rcParams['figure.figsize'] = 10,8
+sns.set(style='whitegrid', palette='bright',
+        rc={'figure.figsize': (15,10)})
 
 #Read the data
 X_train = pd.read_csv('./Data/train.csv')
@@ -17,5 +20,5 @@ data = pd.concat([X_train, X_test], axis=0, sort=True)
 #Preparing data for use
 data = Titanic_data_cleaner(data)
 
-
-
+ax = sns.countplot(x="Pclass", hue="Sex", data=data)
+ax.figure.savefig("output.pdf")
