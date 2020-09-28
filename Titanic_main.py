@@ -17,17 +17,24 @@ X_test = pd.read_csv('./Data/test.csv')
 #fusing data to make a larger data set
 data = pd.concat([X_train, X_test], axis=0, sort=True)
 
+"""
+#Plotting
+plt.figure()
+ax = sns.swarmplot(x="Pclass", y="Fare", hue='Survived', data=data)
+ax.figure.savefig("Swarmplot.pdf")
+plt.figure()
+ax = sns.countplot(x="Pclass", hue="Sex", data=data)
+ax.figure.savefig("Count_by_class_plot.pdf")
+plt.figure()
+ax = sns.countplot(x="Survived", hue="Sex", data=data)
+ax.figure.savefig("Survived_by_sex_plot.pdf")
+"""
+
+
 #Preparing data for use
 data = Titanic_data_cleaner(data)
 
-ax = sns.countplot(x="Pclass", hue="Sex", data=data)
-ax.figure.savefig("output.pdf")
+#Splitting data up again
+train_data = data[pd.notnull(data['Survived'])]
+X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
 
-
-
-s = (data.dtypes == 'object')
-object_cols = list(s[s].index)
-
-print("Categorical variables:")
-print(object_cols)
-print(data)
