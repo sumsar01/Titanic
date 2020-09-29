@@ -8,6 +8,7 @@ from  Titanic_data_cleaner import Titanic_data_cleaner
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
@@ -53,22 +54,25 @@ for i in [X_train, X_val, X_test]:
     print(i.shape)
 """
 
+"""
 #First model
 model = RandomForestClassifier(random_state=0)
-
 #fitting to model
 model.fit(X_train, y_train)
-
 #making predictions on validation data
 preds = model.predict(X_val)
-
-
-
 print(accuracy_score(y_val, preds))
+"""
 
+#Time to improve the model
+#We start with cross validation
+X_train = pd.concat([X_train, X_val])
+y_train = pd.concat([y_train, y_val])
 
+model = RandomForestClassifier(random_state=0)
+cross_val = cross_val_score(model, X_train, y_train, cv=5)
 
-
+print(cross_val.mean())
 
 
 
