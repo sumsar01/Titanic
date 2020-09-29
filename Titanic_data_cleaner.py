@@ -4,8 +4,17 @@ from sklearn.preprocessing import OneHotEncoder
 
 def Titanic_data_cleaner(data):
 #Preparing data for use
-    data.Embarked.fillna(method = 'backfill')
-    data.Fare.dropna()
+    data.Embarked.fillna(method = 'backfill', inplace=True)
+
+#Filling missing fares with median fare    
+    class_fares = dict(data.groupby('Pclass')['Fare'].median())
+
+# create a column of the average fares
+    data['fare_med'] = data['Pclass'].apply(lambda x: class_fares[x])
+
+# replace all missing fares with the value in this column
+    data['Fare'].fillna(data['fare_med'], inplace=True, )
+    del data['fare_med']    
 
 #Imputing missing Age
     data['Title'] = data['Name'].str.extract('([A-Za-z]+)\.', expand=True)

@@ -43,7 +43,7 @@ data = Titanic_data_cleaner(data)
 #Splitting data up again
 train_data = data[pd.notnull(data['Survived'])]
 X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
-X_test = X_test.dropna()
+
 
 #splitting training and validation data
 X_train, X_val, y_train, y_val = train_test_split(
