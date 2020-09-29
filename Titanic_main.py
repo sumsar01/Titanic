@@ -134,6 +134,16 @@ print(grid_result.best_params_)
 print("and had a precision of %f%%, this is a improvement of %f%%\n"
       %(grid_result.best_score_, grid_result.best_score_-second_opt))
 
+#We are not ready to predict the test data
+model = grid_result.best_estimator_
+
+X_test['Survived'] = model.predict(X_test)
+
+predictions = X_test[['PassengerId', 'Survived']]
+predictions['Survived'] = predictions['Survived'].apply(int)
+
+#Save predictions as csv
+predictions.to_csv("Random_Forest_predictions.csv", index=False)
 
 
 
