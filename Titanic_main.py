@@ -8,7 +8,7 @@ from  Titanic_data_cleaner import Titanic_data_cleaner
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
@@ -65,24 +65,31 @@ print(accuracy_score(y_val, preds))
 """
 
 #Time to improve the model
-#We start with cross validation
 X_train = pd.concat([X_train, X_val])
 y_train = pd.concat([y_train, y_val])
-
+#cross-validation
 model = RandomForestClassifier(random_state=0)
 cross_val = cross_val_score(model, X_train, y_train, cv=5)
+print( "%f%% is the result for the first model\n" % (cross_val.mean()))
 
-print(cross_val.mean())
+#We now tune parameters
+n_estimators = [10, 100, 500, 1000]
+max_depth = [None, 5, 10, 20]
+param_grid = dict(n_estimators=n_estimators, max_depth=max_depth)
 
+#We now want to use grid search
+grid = GridSearchCV(estimator=model,
+                    param_grid=param_grid,
+                    cv=3,
+                    verbose=2,
+                    n_jobs=-1)
 
+grid_result = grid.fit(X_train, y_train)
 
-
-
-
-
-
-
-
+print("\nThe best result was with")
+print(grid_result.best_params_)
+print("and had a precision of %f%%, this is a improvement of %f%%"
+      %(grid_result.best_score_, grid_result.best_score_-cross_val.mean()))
 
 
 
