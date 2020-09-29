@@ -16,12 +16,14 @@ sns.set(style='whitegrid', palette='bright',
 
 #Read the data
 X_train = pd.read_csv('./Data/train.csv')
-X_test = pd.read_csv('./Data/test.csv')
+test = pd.read_csv('./Data/test.csv')
 
 #fusing data to make a larger data set
-data = pd.concat([X_train, X_test], axis=0, sort=True)
+data = pd.concat([X_train, test], axis=0, sort=True)
 
-"""
+
+
+
 #Plotting
 plt.figure()
 ax = sns.swarmplot(x="Pclass", y="Fare", hue='Survived', data=data)
@@ -32,7 +34,7 @@ ax.figure.savefig("Count_by_class_plot.pdf")
 plt.figure()
 ax = sns.countplot(x="Survived", hue="Sex", data=data)
 ax.figure.savefig("Survived_by_sex_plot.pdf")
-"""
+
 
 
 #Preparing data for use
@@ -41,6 +43,7 @@ data = Titanic_data_cleaner(data)
 #Splitting data up again
 train_data = data[pd.notnull(data['Survived'])]
 X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
+X_test = X_test.dropna()
 
 #splitting training and validation data
 X_train, X_val, y_train, y_val = train_test_split(
@@ -136,10 +139,13 @@ print("and had a precision of %f%%, this is a improvement of %f%%\n"
 
 #We are not ready to predict the test data
 model = grid_result.best_estimator_
+#cross-validating best model
+print("result of best model cross-validated it: %f%%.\n" %(cross_val_score(model, X_train, y_train, cv=5).mean()))
 
-X_test['Survived'] = model.predict(X_test)
 
-predictions = X_test[['PassengerId', 'Survived']]
+print()
+test['Survived'] = model.predict(X_test)
+predictions = test[['PassengerId', 'Survived']]
 predictions['Survived'] = predictions['Survived'].apply(int)
 
 #Save predictions as csv
