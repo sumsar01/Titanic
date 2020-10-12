@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score, GridSearchCV
-
+from RandomForest_model_trainer import RandomForest_model_trainer
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
         rc={'figure.figsize': (15,10)})
@@ -51,99 +51,17 @@ X_train, X_val, y_train, y_val = train_test_split(
     train_data['Survived'],
     test_size=0.2, random_state=42)
 
-"""
-#testing shape of new data
-for i in [X_train, X_val, X_test]:
-    print(i.shape)
-"""
 
-"""
-#First model
-model = RandomForestClassifier(random_state=0)
-#fitting to model
-model.fit(X_train, y_train)
-#making predictions on validation data
-preds = model.predict(X_val)
-print(accuracy_score(y_val, preds))
-"""
 
 #Time to improve the model
 X_train = pd.concat([X_train, X_val])
 y_train = pd.concat([y_train, y_val])
-#cross-validation
-model = RandomForestClassifier(random_state=0)
-cross_val = cross_val_score(model, X_train, y_train, cv=5)
-print( "%f%% is the result for the first model\n" % (cross_val.mean()))
 
-#We now tune parameters
-n_estimators = [10, 100, 500, 1000]
-max_depth = [None, 5, 10, 20]
-param_grid = dict(n_estimators=n_estimators, max_depth=max_depth)
-
-#We now want to use grid search
-grid = GridSearchCV(estimator=model,
-                    param_grid=param_grid,
-                    cv=3,
-                    verbose=2,
-                    n_jobs=-1)
-
-grid_result = grid.fit(X_train, y_train)
-
-print("\nThe best result was with")
-print(grid_result.best_params_)
-print("and had a precision of %f%%, this is a improvement of %f%%\n"
-      %(grid_result.best_score_, grid_result.best_score_-cross_val.mean()))
-
-first_opt = grid_result.best_score_
-
-#Now we optimize leaf size
-leaf_samples = [1, 2, 3, 4, 5, 6]
-param_grid = dict(min_samples_leaf=leaf_samples)
-
-model = grid_result.best_estimator_
- 
-#grid search
-grid = GridSearchCV(estimator=model,
-                    param_grid=param_grid,
-                    cv=3,
-                    verbose=2,
-                    n_jobs=-1)
-
-grid_result = grid.fit(X_train, y_train)
-
-print("\nThe best result was with")
-print(grid_result.best_params_)
-print("and had a precision of %f%%, this is a improvement of %f%%\n"
-      %(grid_result.best_score_, grid_result.best_score_-first_opt))
-
-second_opt = grid_result.best_score_
-
-max_features = [5, 8, 12, None]
-bootstrap = [True, False]
-param_grid = dict(max_features=max_features,bootstrap=bootstrap)
-
-model = grid_result.best_estimator_
-
-grid = GridSearchCV(estimator=model,
-                    param_grid=param_grid,
-                    cv=3,
-                    verbose=2,
-                    n_jobs=-1)
-
-grid_result = grid.fit(X_train, y_train)
-
-print("\nThe best result was with")
-print(grid_result.best_params_)
-print("and had a precision of %f%%, this is a improvement of %f%%\n"
-      %(grid_result.best_score_, grid_result.best_score_-second_opt))
-
-#We are not ready to predict the test data
-model = grid_result.best_estimator_
-#cross-validating best model
-print("result of best model cross-validated it: %f%%.\n" %(cross_val_score(model, X_train, y_train, cv=5).mean()))
+#Training model
+model = RandomForest_model_trainer(X_train, y_train)
 
 
-print()
+
 test['Survived'] = model.predict(X_test)
 predictions = test[['PassengerId', 'Survived']]
 predictions['Survived'] = predictions['Survived'].apply(int)
