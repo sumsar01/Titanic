@@ -29,12 +29,74 @@ data = pd.concat([X_train, test], axis=0, sort=True)
 #Preparing data for use
 data = Titanic_data_cleaner(data)
 
-#Renormalizing "continuous" data features for NN model use
-
+#scaling "continuous" data features for NN model use
 continuous = ['Age', 'Fare', 'Parch', 'Pclass', 'SibSp', 'Family_Size']
 scaler = StandardScaler()
 
 for var in continuous:
     data[var] = data[var].astype('float64')
     data[var] = scaler.fit_transform(data[var].values.reshape(-1,1))
+
+#Splitting training and testing data
+X_train = data[pd.notnull(data['Survived'])].drop(['Survived'], axis=1)
+y_train = data[pd.notnull(data['Survived'])]['Survived']
+X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
+
+#Creating NN model
+def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
+    
+    #setting seed
+    seed(1)
+    tensorflow.random.set_seed(1)
+    
+    model = Sequential()
+    
+    #create first hidden layer
+    model.add(Dense(lyrs[0], input_dim=X_train.shape[1], activation=act))
+
+    #create more layers
+    for i in range(1, len(lyrs)):
+        model.add(Dense(lyrs[i], activation=act))
+        
+    #add dropout
+    model.add(Dropout(dr))
+    
+    #create output layer
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
+    
+    return model
+
+model = create_model()
+print(model.summary())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
