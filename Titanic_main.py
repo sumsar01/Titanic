@@ -32,12 +32,6 @@ ax.figure.savefig("Survived_by_sex_plot.pdf")
 #Preparing data for use
 data = Titanic_data_cleaner(data)
 
-
-
-
-
-
-
 """
 #RandomForestClassifier
 #Splitting data up again

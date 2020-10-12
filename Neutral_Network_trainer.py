@@ -5,8 +5,15 @@ import matplotlib as plt
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import rcParams
 from  Titanic_data_cleaner import Titanic_data_cleaner
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from RandomForest_model_trainer import RandomForest_model_trainer
+from sklearn.model_selection import GridSearchCV
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout
+from numpy.random import seed
+import tensorflow
+
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
         rc={'figure.figsize': (15,10)})
@@ -18,16 +25,16 @@ test = pd.read_csv('./Data/test.csv')
 #fusing data to make a larger data set
 data = pd.concat([X_train, test], axis=0, sort=True)
 
-#Plotting
-plt.figure()
-ax = sns.swarmplot(x="Pclass", y="Fare", hue='Survived', data=data)
-ax.figure.savefig("Swarmplot.pdf")
-plt.figure()
-ax = sns.countplot(x="Pclass", hue="Sex", data=data)
-ax.figure.savefig("Count_by_class_plot.pdf")
-plt.figure()
-ax = sns.countplot(x="Survived", hue="Sex", data=data)
-ax.figure.savefig("Survived_by_sex_plot.pdf")
 
 #Preparing data for use
 data = Titanic_data_cleaner(data)
+
+#Renormalizing "continuous" data features for NN model use
+
+continuous = ['Age', 'Fare', 'Parch', 'Pclass', 'SibSp', 'Family_Size']
+scaler = StandardScaler()
+
+for var in continuous:
+    data[var] = data[var].astype('float64')
+    data[var] = scaler.fit_transform(data[var].values.reshape(-1,1))
+

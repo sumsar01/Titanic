@@ -48,6 +48,8 @@ def Titanic_data_cleaner(data):
         
         del data[cat]
 
+#Add family size variable
+    data['Family_Size'] = data['Parch'] + data['SibSp']
 
 #Drop unused data
     data.drop(['Cabin', 'Ticket', 'Name', 'PassengerId'], axis=1, inplace=True)
