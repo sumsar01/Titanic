@@ -68,35 +68,33 @@ def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
     
     return model
 
-model = create_model()
-print(model.summary())
 
-#Train model with 80/20 CV split
-training = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, 
-                     verbose=0)
+#We now want to optimize our model with grid search
+#creating model
+model = KerasClassifier(build_fn=create_model, verbose=0)
 
-val_acc = np.mean(training.history['val_accuracy'])
-print("\n%s: %.2f%%" % ('val_acc', val_acc*100))
-
-#plotting training acc as a function of epoch
-plt.plot(training.history['accuracy'])
-plt.plot(training.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'validation'], loc='lower right')
-plt.show()
+#define grid search parameters
+batch_size = [16, 32, 64]
+epochs = [50, 100]
+param_grid = dict(batch_size=batch_size, epochs=epochs)
 
 
+#perform grid search
+grid = GridSearchCV(estimator=model,
+                    param_grid=param_grid,
+                    cv=3,
+                    verbose=2)
 
+grid_result = grid.fit(X_train, y_train)
 
+#Summarize results
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
 
-
-
-
-
-
-
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
 
 
 
