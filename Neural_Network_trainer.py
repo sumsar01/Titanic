@@ -13,7 +13,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
 from numpy.random import seed
 import tensorflow
-
+"""
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
         rc={'figure.figsize': (15,10)})
@@ -28,45 +28,72 @@ data = pd.concat([X_train, test], axis=0, sort=True)
 
 #Preparing data for use
 data = Titanic_data_cleaner(data)
+"""
+def NN_model(data):
+    #scaling "continuous" data features for NN model use
+    continuous = ['Age', 'Fare', 'Parch', 'Pclass', 'SibSp', 'Family_Size']
+    scaler = StandardScaler()
 
-#scaling "continuous" data features for NN model use
-continuous = ['Age', 'Fare', 'Parch', 'Pclass', 'SibSp', 'Family_Size']
-scaler = StandardScaler()
+    for var in continuous:
+        data[var] = data[var].astype('float64')
+        data[var] = scaler.fit_transform(data[var].values.reshape(-1,1))
 
-for var in continuous:
-    data[var] = data[var].astype('float64')
-    data[var] = scaler.fit_transform(data[var].values.reshape(-1,1))
+    #Splitting training and testing data
+    X_train = data[pd.notnull(data['Survived'])].drop(['Survived'], axis=1)
+    y_train = data[pd.notnull(data['Survived'])]['Survived']
+    X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
 
-#Splitting training and testing data
-X_train = data[pd.notnull(data['Survived'])].drop(['Survived'], axis=1)
-y_train = data[pd.notnull(data['Survived'])]['Survived']
-X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
-
-#Creating NN model
-def create_model(lyrs=8, act='linear', opt='RMSprop', dr=0.0):
+    #Creating NN model
+    def create_model(lyrs=[8], act='linear', opt='RMSprop', dr=0.0):
     
-    #setting seed
-    seed(1)
-    tensorflow.random.set_seed(1)
+        #setting seed
+        seed(1)
+        tensorflow.random.set_seed(1)
     
-    model = Sequential()
+        model = Sequential()
     
-    #create first hidden layer
-    model.add(Dense(lyrs[0], input_dim=X_train.shape[1], activation=act))
+        #create first hidden layer
+        model.add(Dense(lyrs[0], input_dim=X_train.shape[1], activation=act))
 
-    #create more layers
-    for i in range(1, len(lyrs)):
-        model.add(Dense(lyrs[i], activation=act))
+        #create more layers
+        for i in range(1, len(lyrs)):
+            model.add(Dense(lyrs[i], activation=act))
         
-    #add dropout
-    model.add(Dropout(dr))
+        #add dropout
+        model.add(Dropout(dr))
     
-    #create output layer
-    model.add(Dense(1, activation='sigmoid'))
+        #create output layer
+        model.add(Dense(1, activation='sigmoid'))
     
-    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
     
-    return model
+        return model
+
+    #create final model
+    model = create_model(lyrs=[8], dr=0.0)
+    print(model.summary())
+
+    #training model with 80/20 CV split
+    training = model.fit(X_train, y_train, epochs=50, batch_size=32,
+                         validation_split=0.2, verbose=0)
+
+    #evaluate model
+    scores = model.evaluate(X_train, y_train)
+    print(print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100)))
+
+    # summarize history for accuracy
+    plt.figure()
+    plt.plot(training.history['accuracy'])
+    plt.plot(training.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'validation'], loc='lower right')
+    plt.show()
+
+
+    return model, X_test
+
 
 """
 #We now want to optimize our model with grid search
@@ -140,7 +167,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 """
-
+"""
 # create model
 model = KerasClassifier(build_fn=create_model, 
                         epochs=50, batch_size=32, verbose=0)
@@ -152,6 +179,22 @@ param_grid = dict(lyrs=layers)
 # search the grid
 grid = GridSearchCV(estimator=model, param_grid=param_grid, verbose=2)
 grid_result = grid.fit(X_train, y_train)
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

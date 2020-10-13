@@ -7,6 +7,7 @@ from matplotlib.pyplot import rcParams
 from  Titanic_data_cleaner import Titanic_data_cleaner
 from sklearn.model_selection import train_test_split
 from RandomForest_model_trainer import RandomForest_model_trainer
+from Neural_Network_trainer import NN_model
 rcParams['figure.figsize'] = 10,8
 sns.set(style='whitegrid', palette='bright',
         rc={'figure.figsize': (15,10)})
@@ -32,7 +33,15 @@ ax.figure.savefig("Survived_by_sex_plot.pdf")
 #Preparing data for use
 data = Titanic_data_cleaner(data)
 
-"""
+#making neural network model and predictions
+model, X_test = NN_model(data)
+test['Survived'] = model.predict(X_test)
+test['Survived'] = test['Survived'].apply(lambda x: round(x,0)).astype('int')
+predictions = test[['PassengerId', 'Survived']]
+
+#Save predictions as csv
+predictions.to_csv("Neural_Network_predictions.csv", index=False)
+
 #RandomForestClassifier
 #Splitting data up again
 train_data = data[pd.notnull(data['Survived'])]
@@ -57,7 +66,7 @@ predictions['Survived'] = predictions['Survived'].apply(int)
 
 #Save predictions as csv
 predictions.to_csv("Random_Forest_predictions.csv", index=False)
-"""
+
 
 
 
