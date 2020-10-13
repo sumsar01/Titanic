@@ -43,7 +43,7 @@ y_train = data[pd.notnull(data['Survived'])]['Survived']
 X_test = data[pd.isnull(data['Survived'])].drop(['Survived'], axis=1)
 
 #Creating NN model
-def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
+def create_model(lyrs=8, act='linear', opt='RMSprop', dr=0.0):
     
     #setting seed
     seed(1)
@@ -68,7 +68,7 @@ def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
     
     return model
 
-
+"""
 #We now want to optimize our model with grid search
 #creating model
 model = KerasClassifier(build_fn=create_model, verbose=0)
@@ -95,6 +95,66 @@ params = grid_result.cv_results_['params']
 
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
+
+#Finding best optimization algorithm
+model = KerasClassifier(build_fn=create_model, epochs=50, batch_size=32, verbose=0)
+
+#defining grid search params
+optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Nadam']
+param_grid = dict(opt=optimizer)
+
+#searching grid
+grid = GridSearchCV(estimator=model, param_grid=param_grid, verbose=2)
+grid_result = grid.fit(X_train, y_train)
+
+#Summarize results
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
+
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
+
+
+#optimizing number of dropout
+
+# create model
+model = KerasClassifier(build_fn=create_model, 
+                        epochs=50, batch_size=32, verbose=0)
+
+# define the grid search parameters
+drops = [0.0, 0.01, 0.05, 0.1, 0.2, 0.5]
+param_grid = dict(dr=drops)
+
+# search the grid
+grid = GridSearchCV(estimator=model, param_grid=param_grid, verbose=2)
+grid_result = grid.fit(X_train, y_train)
+
+#Summarize results
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
+
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
+"""
+
+# create model
+model = KerasClassifier(build_fn=create_model, 
+                        epochs=50, batch_size=32, verbose=0)
+
+# define the grid search parameters
+layers = [[8], [10]]
+param_grid = dict(lyrs=layers)
+
+# search the grid
+grid = GridSearchCV(estimator=model, param_grid=param_grid, verbose=2)
+grid_result = grid.fit(X_train, y_train)
+
+
+
 
 
 
