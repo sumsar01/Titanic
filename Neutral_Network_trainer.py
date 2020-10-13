@@ -71,17 +71,21 @@ def create_model(lyrs=[8], act='linear', opt='Adam', dr=0.0):
 model = create_model()
 print(model.summary())
 
+#Train model with 80/20 CV split
+training = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.2, 
+                     verbose=0)
 
+val_acc = np.mean(training.history['val_accuracy'])
+print("\n%s: %.2f%%" % ('val_acc', val_acc*100))
 
-
-
-
-
-
-
-
-
-
+#plotting training acc as a function of epoch
+plt.plot(training.history['accuracy'])
+plt.plot(training.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'validation'], loc='lower right')
+plt.show()
 
 
 
